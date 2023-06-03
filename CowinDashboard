@@ -1,0 +1,162 @@
+// Write your code here
+import {Component} from 'react'
+import Loader from 'react-loader-spinner'
+
+import VaccinationCoverage from '../VaccinationCoverage'
+import VaccinationByGender from '../VaccinationByGender'
+import VaccinationByAge from '../VaccinationByAge'
+
+import './index.css'
+const caponentsValues = {
+  pending: 'PENDING',
+  failure: 'FAILURE',
+  initaly: 'INITALY',
+}
+
+class CowinDashboard extends Component {
+  state = {
+    fetchedData: {},
+    displayStatus: caponentsValues.initaly,
+  }
+  componentDidMount() {
+    this.fetchedDataApi()
+  }
+
+  fetchedDataApi = async () => {
+    this.setState({displayStatus: caponentsValues.pending})
+    const url = 'https://apis.ccbp.in/covid-vaccination-data'
+    const response = await fetch(url)
+    const data = await response.json()
+    if (response.ok === true) {
+      const convertData = {
+        last7DayVaccination: data.last_7_days_vaccination,
+        vaccinationByAge: data.vaccination_by_age,
+        vaccinationByGender: data.vaccination_by_gender,
+      }
+      this.setState({
+        fetchedData: convertData,
+        displayStatus: caponentsValues.sucess,
+      })
+    } else {
+      this.setState({displayStatus: caponentsValues.failure})
+    }
+  }
+  renderPycharts = () => {
+    const {fetchedData} = this.state
+
+    const {
+      last7DayVaccination,
+      vaccinationByAge,
+      vaccinationByGender,
+    } = fetchedData
+    return (
+      <>
+        <VaccinationCoverage VaccinationData={last7DayVaccination} />
+        <VaccinationByGender VaccinationByGenderData={vaccinationByGender} />
+        <VaccinationByAge VaccinationByAgeData={vaccinationByAge} />
+      </>
+    )
+  }
+
+  loadingView = () => (
+    <div data-testid="loader">
+      <Loader type="ThreeDots" color="#ffffff" height={80} width={80} />
+    </div>
+  )
+  failureView = () => (
+    <div className="failure-view-container">
+      <img
+        className="failure-view-img"
+        src="https://assets.ccbp.in/frontend/react-js/api-failure-view.png"
+        alt="failure view"
+      />
+      <h1 className="failure-view-text">Something went wrong</h1>
+    </div>
+  )
+  SwitchcaseCheck = () => {
+    const {displayStatus} = this.state
+    switch (displayStatus) {
+      case caponentsValues.sucess:
+        return this.renderPycharts()
+      case caponentsValues.pending:
+        return this.loadingView()
+      case caponentsValues.failure:
+        return this.failureView()
+      default:
+        return null
+    }
+  }
+  render() {
+    return (
+      <div className="page-container">
+        <div className="page-logo-container">
+          <img
+            className="logo"
+            src="https://assets.ccbp.in/frontend/react-js/cowin-logo.png"
+            alt="website logo"
+          />
+          <p className="logo-text">Co-WIN</p>
+        </div>
+        <h1 className="page-heading">CoWIN Vaccination in India</h1>
+        <div className="chats-container">{this.SwitchcaseCheck()}</div>
+      </div>
+    )
+  }
+}
+
+export default CowinDashboard
+
+
+
+
+
+
+/* Write your CSS here */
+.page-container {
+  background-color: #161625;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-top: 20px;
+}
+.page-logo-container {
+  display: flex;
+  align-items: center;
+}
+.logo {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+.logo-text {
+  color: #2cc6c6;
+}
+.page-heading {
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 400;
+  font-family: 'Roboto';
+  margin-top: 0px;
+}
+.chats-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.failure-view-container {
+  display: flex;
+  flex-direction: column;
+}
+.failure-view-img {
+  height: 500px;
+  width: 500px;
+}
+.failure-view-text {
+  color: #ffffff;
+  font-size: 35px;
+  font-weight: 600;
+  font-family: 'Roboto';
+}
