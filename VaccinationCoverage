@@ -20,7 +20,7 @@ const VaccinationCoverage = props => {
 
   return (
     <div className="coverage-card-container">
-      <h1 className="coverage-card-heading">Vaccination by gender</h1>
+      <h1 className="coverage-card-heading">Vaccination Coverage</h1>
       <ResponsiveContainer width={1000} height={300}>
         <BarChart
           data={VaccinationData}
